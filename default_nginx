@@ -1,0 +1,67 @@
+
+
+
+upstream backend {
+	server 127.0.0.1:8081 weight=2;
+	server 127.0.0.1:8082;
+	server 127.0.0.1:8083;
+}
+
+server {
+        listen       80 default_server;
+        listen       [::]:80 default_server;
+        #server_name  _;
+        root  /var/www/html;
+        index index.html index.htm index.nginx-debian.html;   
+       # include /etc/nginx/default.d/*.conf;
+        server_name site.ru www.site.ru;
+		location / {
+			#try_files $uri $uri/ =404;
+			proxy_pass http://backend;
+			#proxy_pass http://localhost:8080;
+                        proxy_set_header Host $host;
+			proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+			proxy_set_header X-Real-IP $remote_addr;
+		}
+
+		location @apache {
+#try_files $uri $uri/ =404;
+                        proxy_pass http://backend;
+                        #proxy_pass http://localhost:8080;
+                        proxy_set_header Host $host;
+                        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                        proxy_set_header X-Real-IP $remote_addr;			
+
+
+
+
+
+
+#include fastcgi_params;
+			#root /var/www/html;
+
+			#fastcgi_pass unix:/run/php/php7.4-fpm.sock;
+			#fastcgi_pass 127.0.0.1:9000;
+		}
+
+	location ~* ^.+.(jpg|jpeg|gif|png|ico|css|zip|pdf|txt|tar|js)$ {
+	        root /usr/share/apache2;
+	}
+       
+       location /icons/test {
+               root /usr/share/apache2;
+       }  
+       location /static {
+       }
+
+
+
+       # error_page 404 /404.html;
+        #location = /404.html {
+      #  }
+
+       # error_page 500 502 503 504 /50x.html;
+       # location = /50x.html {
+       # }
+
+}
